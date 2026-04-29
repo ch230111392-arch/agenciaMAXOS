@@ -1,13 +1,1298 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agenciamaxos</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Travel CRM</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    body { background: #f3f4f6; margin: 0; }
+    .sidebar { width: 220px; min-width: 220px; background: #fff; border-right: 1px solid #e5e7eb; min-height: 100vh; position: relative; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; cursor: pointer; color: #6b7280; font-size: 14px; font-weight: 500; transition: all 0.15s; margin: 2px 8px; }
+    .nav-item:hover { background: #f3f4f6; color: #111827; }
+    .nav-item.active { background: #2563eb; color: #fff; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; }
+    .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .btn-primary { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-green { background: #16a34a; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-green:hover { background: #15803d; }
+    .btn-danger { background: #fff; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-danger:hover { background: #fef2f2; }
+    .btn-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+    .btn-secondary:hover { background: #f9fafb; }
+    .btn-edit { background: #fff; color: #2563eb; border: 1px solid #2563eb; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-edit:hover { background: #eff6ff; }
+    .table-container { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; background: #f9fafb; }
+    td { padding: 14px 16px; font-size: 14px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: #dcfce7; color: #16a34a; }
+    .badge-yellow { background: #fef9c3; color: #ca8a04; }
+    .badge-red { background: #fee2e2; color: #dc2626; }
+    .badge-blue { background: #dbeafe; color: #2563eb; }
+    .badge-purple { background: #ede9fe; color: #7c3aed; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal { background: #fff; border-radius: 16px; width: 100%; max-width: 540px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+    .form-input { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 12px; font-size: 14px; color: #111827; outline: none; transition: border 0.15s; }
+    .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .form-select { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 12px; font-size: 14px; color: #111827; outline: none; background: #fff; }
+    .form-select:focus { border-color: #2563eb; }
+    .toast { position: fixed; top: 20px; right: 20px; z-index: 999; background: #111827; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: 500; animation: toastIn 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .toast.success { background: #16a34a; }
+    .toast.error { background: #dc2626; }
+    @keyframes toastIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+    .main-layout { display: flex; min-height: 100vh; }
+    .main-content { flex: 1; padding: 28px; overflow-x: hidden; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-title { font-size: 26px; font-weight: 700; color: #111827; margin: 0; }
+    .logo-icon { width: 36px; height: 36px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+    .logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+    textarea.form-input { resize: vertical; }
+    .actions-cell { display: flex; gap: 8px; }
+    .filter-bar { background: #fff; border-radius: 10px; border: 1px solid #e5e7eb; padding: 14px 16px; margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .filter-bar .form-group { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div style="min-height:100vh;background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#fff;border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div style="text-align:center;margin-bottom:28px;">
+        <div id="login-logo" style="width:56px;height:56px;background:#2563eb;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;overflow:hidden;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 21l9-18 9 18"/><path d="M6.5 14h11"/></svg>
+        </div>
+        <h1 id="login-nombre-agencia" style="font-size:24px;font-weight:700;color:#111827;margin:0 0 4px;">Travel CRM</h1>
+        <p style="font-size:14px;color:#6b7280;margin:0;">Inicia sesión para continuar</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="text" id="login-user" class="form-input" placeholder="admin@travel.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" id="login-password" class="form-input" placeholder="••••••••">
+      </div>
+      <button onclick="handleLogin()" class="btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:15px;margin-top:8px;">
+        Ingresar
+      </button>
+      <p id="login-error" style="text-align:center;font-size:13px;color:#dc2626;margin-top:16px;display:none;">Credenciales incorrectas</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" style="display:none;">
+  <div class="main-layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div style="display:flex;align-items:center;gap:10px;padding:20px 16px 16px;border-bottom:1px solid #e5e7eb;margin-bottom:8px;">
+        <div class="logo-icon" id="sidebar-logo-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 21l9-18 9 18"/><path d="M6.5 14h11"/></svg>
+        </div>
+        <span id="sidebar-nombre" style="font-size:15px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Travel CRM</span>
+      </div>
+      <nav style="padding:0 4px;">
+        <div onclick="showPage('dashboard')" id="nav-dashboard" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+        <div onclick="showPage('clientes')" id="nav-clientes" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Clientes
+        </div>
+        <div onclick="showPage('proveedores')" id="nav-proveedores" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Proveedores
+        </div>
+        <div onclick="showPage('cotizaciones')" id="nav-cotizaciones" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>
+          Cotizaciones
+        </div>
+        <div onclick="showPage('reservas')" id="nav-reservas" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Reservas
+        </div>
+        <div onclick="showPage('comisiones')" id="nav-comisiones" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Comisiones
+        </div>
+        <div onclick="showPage('reportes')" id="nav-reportes" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Reportes
+        </div>
+        <div onclick="showPage('configuracion')" id="nav-configuracion" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0"/></svg>
+          Configuración
+        </div>
+      </nav>
+      <div style="position:absolute;bottom:20px;left:0;right:0;padding:0 12px;">
+        <div onclick="logout()" class="nav-item" style="color:#ef4444;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar Sesión
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" style="display:block;">
+        <div class="page-header"><h1 class="page-title">Dashboard</h1></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="stat-icon" style="background:#dbeafe;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <div><div style="font-size:12px;color:#6b7280;font-weight:500;">Total Clientes</div><div id="stat-clientes" style="font-size:28px;font-weight:700;color:#111827;">0</div></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="stat-icon" style="background:#fef9c3;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg></div>
+              <div><div style="font-size:12px;color:#6b7280;font-weight:500;">Cotizaciones</div><div id="stat-cotizaciones" style="font-size:28px;font-weight:700;color:#111827;">0</div></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="stat-icon" style="background:#dcfce7;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div><div style="font-size:12px;color:#6b7280;font-weight:500;">Reservas</div><div id="stat-reservas" style="font-size:28px;font-weight:700;color:#111827;">0</div></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="stat-icon" style="background:#ede9fe;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div><div style="font-size:12px;color:#6b7280;font-weight:500;">Ingresos Totales</div><div id="stat-ingresos" style="font-size:20px;font-weight:700;color:#111827;">$0.00</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-container">
+          <div style="padding:18px 20px;border-bottom:1px solid #e5e7eb;"><h3 style="font-size:16px;font-weight:600;color:#111827;margin:0;">Reservas Recientes</h3></div>
+          <table>
+            <thead><tr><th>#</th><th>CLIENTE</th><th>MONTO</th><th>FECHA</th></tr></thead>
+            <tbody id="dashboard-reservas-body"><tr><td colspan="4" style="text-align:center;padding:32px;color:#9ca3af;">No hay reservas aún</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div id="page-clientes" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Clientes</h1>
+          <button class="btn-primary" onclick="openModalCliente()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar Cliente
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>NOMBRE</th><th>EMAIL</th><th>TELÉFONO</th><th>CÓMO LLEGÓ</th><th>ACCIONES</th></tr></thead>
+            <tbody id="clientes-body"><tr><td colspan="5" style="text-align:center;padding:32px;color:#9ca3af;">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROVEEDORES -->
+      <div id="page-proveedores" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Proveedores</h1>
+          <button class="btn-primary" onclick="openModalProveedor()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar Proveedor
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>NOMBRE</th><th>TIPO</th><th>COMISIÓN</th><th>ACCIONES</th></tr></thead>
+            <tbody id="proveedores-body"><tr><td colspan="4" style="text-align:center;padding:32px;color:#9ca3af;">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COTIZACIONES -->
+      <div id="page-cotizaciones" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Cotizaciones</h1>
+          <button class="btn-primary" onclick="openModalCotizacion()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva Cotización
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>CLIENTE</th><th>DESTINO</th><th>PRECIO</th><th>F. COTIZACIÓN</th><th>F. VIAJE</th><th>ESTATUS</th><th>ACCIONES</th></tr></thead>
+            <tbody id="cotizaciones-body"><tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af;">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RESERVAS -->
+      <div id="page-reservas" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Reservas</h1>
+          <button class="btn-primary" onclick="openModalReserva()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva Reserva
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>CLIENTE</th><th>TIPO</th><th>PROVEEDOR</th><th>MONTO</th><th>PAGO</th><th>CAJA</th><th>FECHA</th><th>COMISIÓN</th><th>ACCIONES</th></tr></thead>
+            <tbody id="reservas-body"><tr><td colspan="9" style="text-align:center;padding:32px;color:#9ca3af;">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COMISIONES -->
+      <div id="page-comisiones" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Comisiones</h1>
+          <button class="btn-primary" onclick="openModalComision()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva Comisión
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>CLIENTE</th><th>PROVEEDOR</th><th>MONTO</th><th>INICIO VIAJE</th><th>FIN VIAJE</th><th>PAGADA</th><th>NOTAS</th><th>ACCIONES</th></tr></thead>
+            <tbody id="comisiones-body"><tr><td colspan="8" style="text-align:center;padding:32px;color:#9ca3af;">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REPORTES -->
+      <div id="page-reportes" style="display:none;">
+        <div class="page-header"><h1 class="page-title">Reportes</h1></div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid #e5e7eb;padding-bottom:0;">
+          <button onclick="switchReporte('cotizaciones')" id="rep-tab-cotizaciones" style="padding:10px 18px;border:none;background:none;font-size:14px;font-weight:600;color:#2563eb;border-bottom:3px solid #2563eb;cursor:pointer;">Cotizaciones</button>
+          <button onclick="switchReporte('reservas')" id="rep-tab-reservas" style="padding:10px 18px;border:none;background:none;font-size:14px;font-weight:500;color:#6b7280;border-bottom:3px solid transparent;cursor:pointer;">Reservas del Mes</button>
+          <button onclick="switchReporte('comisiones')" id="rep-tab-comisiones" style="padding:10px 18px;border:none;background:none;font-size:14px;font-weight:500;color:#6b7280;border-bottom:3px solid transparent;cursor:pointer;">Comisiones</button>
+          <button onclick="switchReporte('general')" id="rep-tab-general" style="padding:10px 18px;border:none;background:none;font-size:14px;font-weight:500;color:#6b7280;border-bottom:3px solid transparent;cursor:pointer;">General</button>
+        </div>
+
+        <!-- Reporte Cotizaciones -->
+        <div id="rep-panel-cotizaciones">
+          <div class="filter-bar">
+            <div class="form-group"><label class="form-label">Fecha inicio</label><input type="date" id="rep-cot-fi" class="form-input" style="width:160px;"></div>
+            <div class="form-group"><label class="form-label">Fecha fin</label><input type="date" id="rep-cot-ff" class="form-input" style="width:160px;"></div>
+            <div class="form-group"><label class="form-label">Proveedor</label>
+              <select id="rep-cot-prov" class="form-select" style="width:180px;">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="cargarReporteCotizaciones()">Buscar</button>
+            <button class="btn-green" onclick="exportarExcel('rep-cot-tabla','Cotizaciones')">⬇ Excel</button>
+            <button class="btn-secondary" onclick="exportarPDF('rep-cot-tabla','Reporte de Cotizaciones')">⬇ PDF</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>CLIENTE</th><th>PROVEEDOR</th><th>DESTINO</th><th>PRECIO</th><th>F. COTIZACIÓN</th><th>F. VIAJE</th><th>ESTATUS</th></tr></thead>
+              <tbody id="rep-cot-tabla"><tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af;">Aplica filtros y presiona Buscar</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Reporte Reservas -->
+        <div id="rep-panel-reservas" style="display:none;">
+          <div class="filter-bar">
+            <div class="form-group"><label class="form-label">Fecha inicio</label><input type="date" id="rep-res-fi" class="form-input" style="width:160px;"></div>
+            <div class="form-group"><label class="form-label">Fecha fin</label><input type="date" id="rep-res-ff" class="form-input" style="width:160px;"></div>
+            <button class="btn-primary" onclick="cargarReporteReservas()">Buscar</button>
+            <button class="btn-green" onclick="exportarExcel('rep-res-tabla','Reservas')">⬇ Excel</button>
+            <button class="btn-secondary" onclick="exportarPDF('rep-res-tabla','Reporte de Reservas')">⬇ PDF</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>CLIENTE</th><th>PROVEEDOR</th><th>TIPO</th><th>MONTO</th><th>TIPO PAGO</th><th>CAJA</th><th>FECHA</th><th>COMISIÓN</th></tr></thead>
+              <tbody id="rep-res-tabla"><tr><td colspan="8" style="text-align:center;padding:32px;color:#9ca3af;">Aplica filtros y presiona Buscar</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Reporte Comisiones -->
+        <div id="rep-panel-comisiones" style="display:none;">
+          <div class="filter-bar">
+            <div class="form-group"><label class="form-label">Mostrar</label>
+              <select id="rep-com-pagada" class="form-select" style="width:180px;">
+                <option value="">Todas</option>
+                <option value="No">Pendientes de cobro</option>
+                <option value="Si">Ya cobradas</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="cargarReporteComisiones()">Buscar</button>
+            <button class="btn-green" onclick="exportarExcel('rep-com-tabla','Comisiones')">⬇ Excel</button>
+            <button class="btn-secondary" onclick="exportarPDF('rep-com-tabla','Reporte de Comisiones')">⬇ PDF</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>CLIENTE</th><th>PROVEEDOR</th><th>MONTO</th><th>INICIO VIAJE</th><th>FIN VIAJE</th><th>PAGADA</th><th>NOTAS</th></tr></thead>
+              <tbody id="rep-com-tabla"><tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af;">Aplica filtros y presiona Buscar</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Reporte General -->
+        <div id="rep-panel-general" style="display:none;">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+            <div class="stat-card">
+              <h3 style="font-size:15px;font-weight:600;color:#111827;margin:0 0 16px;">Resumen General</h3>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:8px;"><span style="font-size:13px;color:#6b7280;">Total Clientes</span><span id="rep-clientes" style="font-size:15px;font-weight:700;color:#111827;">0</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:8px;"><span style="font-size:13px;color:#6b7280;">Total Cotizaciones</span><span id="rep-cotizaciones" style="font-size:15px;font-weight:700;color:#111827;">0</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:8px;"><span style="font-size:13px;color:#6b7280;">Total Reservas</span><span id="rep-reservas" style="font-size:15px;font-weight:700;color:#111827;">0</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#dbeafe;border-radius:8px;"><span style="font-size:13px;color:#1d4ed8;font-weight:600;">Ingresos Totales</span><span id="rep-ingresos" style="font-size:15px;font-weight:700;color:#1d4ed8;">$0.00</span></div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h3 style="font-size:15px;font-weight:600;color:#111827;margin:0 0 16px;">Cotizaciones por Estado</h3>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:8px;"><span style="font-size:13px;color:#6b7280;">Aceptadas</span><span id="rep-aceptadas" class="badge badge-green">0</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:8px;"><span style="font-size:13px;color:#6b7280;">Pendientes</span><span id="rep-pendientes" class="badge badge-yellow">0</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:8px;"><span style="font-size:13px;color:#6b7280;">Rechazadas</span><span id="rep-rechazadas" class="badge badge-red">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIGURACIÓN -->
+      <div id="page-configuracion" style="display:none;">
+        <div class="page-header"><h1 class="page-title">Configuración</h1></div>
+        <div style="background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:28px;max-width:580px;">
+          <h3 style="font-size:16px;font-weight:600;color:#111827;margin:0 0 20px;">Identidad de la Agencia</h3>
+          <div class="form-group">
+            <label class="form-label">Nombre de la Agencia</label>
+            <input type="text" id="cfg-nombre" class="form-input" placeholder="Mi Agencia de Viajes">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Logo (imagen)</label>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div id="cfg-logo-preview" style="width:64px;height:64px;border-radius:12px;background:#f3f4f6;border:2px dashed #d1d5db;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <div style="flex:1;">
+                <input type="file" id="cfg-logo-file" accept="image/*" onchange="previewLogo(this)" style="display:none;">
+                <button onclick="document.getElementById('cfg-logo-file').click()" class="btn-secondary" style="width:100%;margin-bottom:8px;">Seleccionar imagen</button>
+                <p style="font-size:12px;color:#9ca3af;margin:0;">JPG, PNG o SVG. Máx 2MB.</p>
+              </div>
+            </div>
+          </div>
+          <button onclick="saveConfiguracion()" class="btn-primary" style="margin-top:8px;">Guardar Cambios</button>
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e5e7eb;">
+            <h4 style="font-size:14px;font-weight:600;color:#111827;margin:0 0 8px;">Conexión al Servidor</h4>
+            <p style="font-size:13px;color:#6b7280;margin:0;">API REST en <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">http://localhost:3000</code></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODALES ===================== -->
+
+<!-- MODAL CLIENTE -->
+<div id="modal-cliente" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="modal-cliente-title" style="margin:0;font-size:17px;font-weight:600;color:#111827;">Agregar Cliente</h3>
+      <button onclick="closeModal('modal-cliente')" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9ca3af;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <input type="hidden" id="cli-id">
+      <div class="form-group"><label class="form-label">Nombre *</label><input type="text" id="cli-nombre" class="form-input" placeholder="Nombre completo"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email</label><input type="email" id="cli-email" class="form-input" placeholder="correo@ejemplo.com"></div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input type="tel" id="cli-telefono" class="form-input" placeholder="55 1234 5678"></div>
+      </div>
+      <div class="form-group"><label class="form-label">¿Cómo supieron de la agencia?</label>
+        <select id="cli-como" class="form-select">
+          <option value="">— Sin especificar —</option>
+          <option value="Recomendación">Recomendación</option>
+          <option value="Redes Sociales">Redes Sociales</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Google">Google</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Cartel / Volante">Cartel / Volante</option>
+          <option value="Otra agencia">Otra agencia</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:12px;justify-content:flex-end;">
+      <button onclick="closeModal('modal-cliente')" class="btn-secondary">Cancelar</button>
+      <button onclick="saveCliente()" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROVEEDOR -->
+<div id="modal-proveedor" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="modal-proveedor-title" style="margin:0;font-size:17px;font-weight:600;color:#111827;">Agregar Proveedor</h3>
+      <button onclick="closeModal('modal-proveedor')" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9ca3af;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <input type="hidden" id="prov-id">
+      <div class="form-group"><label class="form-label">Nombre *</label><input type="text" id="prov-nombre" class="form-input" placeholder="Nombre del proveedor"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo</label>
+          <select id="prov-tipo" class="form-select">
+            <option value="Directo">Directo</option>
+            <option value="Agencia Host">Agencia Host</option>
+            <option value="Mayorista">Mayorista</option>
+            <option value="Consolidador">Consolidador</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Comisión (%)</label><input type="number" id="prov-comision" class="form-input" value="0" min="0" max="100"></div>
+      </div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:12px;justify-content:flex-end;">
+      <button onclick="closeModal('modal-proveedor')" class="btn-secondary">Cancelar</button>
+      <button onclick="saveProveedor()" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COTIZACIÓN -->
+<div id="modal-cotizacion" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="modal-cotizacion-title" style="margin:0;font-size:17px;font-weight:600;color:#111827;">Nueva Cotización</h3>
+      <button onclick="closeModal('modal-cotizacion')" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9ca3af;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <input type="hidden" id="cot-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Cliente</label><select id="cot-cliente" class="form-select"></select></div>
+        <div class="form-group"><label class="form-label">Proveedor</label><select id="cot-proveedor" class="form-select"></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Destino *</label><input type="text" id="cot-destino" class="form-input" placeholder="Ej: Cancún, París..."></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Precio ($)</label><input type="number" id="cot-precio" class="form-input" value="0" min="0"></div>
+        <div class="form-group"><label class="form-label">Estatus</label>
+          <select id="cot-estatus" class="form-select">
+            <option value="Pendiente">Pendiente</option>
+            <option value="Aceptada">Aceptada</option>
+            <option value="Rechazada">Rechazada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Fecha de Cotización</label><input type="date" id="cot-fecha" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Fecha del Viaje</label><input type="date" id="cot-fecha-viaje" class="form-input"></div>
+      </div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:12px;justify-content:flex-end;">
+      <button onclick="closeModal('modal-cotizacion')" class="btn-secondary">Cancelar</button>
+      <button onclick="saveCotizacion()" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESERVA -->
+<div id="modal-reserva" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="modal-reserva-title" style="margin:0;font-size:17px;font-weight:600;color:#111827;">Nueva Reserva</h3>
+      <button onclick="closeModal('modal-reserva')" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9ca3af;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <input type="hidden" id="res-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Cliente</label><select id="res-cliente" class="form-select"></select></div>
+        <div class="form-group"><label class="form-label">Proveedor (con quien se compró)</label><select id="res-proveedor" class="form-select"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo de Servicio</label>
+          <select id="res-tipo" class="form-select">
+            <option value="Paquete de viaje">Paquete de viaje</option>
+            <option value="Solo vuelo">Solo vuelo</option>
+            <option value="Solo hospedaje">Solo hospedaje</option>
+            <option value="Vuelo">Vuelo</option>
+            <option value="Tour">Tour</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Tipo de Pago</label>
+          <select id="res-pago" class="form-select">
+            <option value="Una sola exhibición">Una sola exhibición</option>
+            <option value="Meses">Meses</option>
+            <option value="Depósito">Depósito</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Monto Total ($)</label><input type="number" id="res-monto" class="form-input" value="0" min="0"></div>
+        <div class="form-group"><label class="form-label">Caja / Banco</label>
+          <select id="res-caja" class="form-select">
+            <option value="">— Sin especificar —</option>
+            <option value="BBVA">BBVA</option>
+            <option value="Santander">Santander</option>
+            <option value="Banamex">Banamex</option>
+            <option value="HSBC">HSBC</option>
+            <option value="Banorte">Banorte</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Fecha</label><input type="date" id="res-fecha" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Comisión Capturada</label>
+          <select id="res-comision" class="form-select">
+            <option value="Si">Sí</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:12px;justify-content:flex-end;">
+      <button onclick="closeModal('modal-reserva')" class="btn-secondary">Cancelar</button>
+      <button onclick="saveReserva()" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COMISIÓN -->
+<div id="modal-comision" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="modal-comision-title" style="margin:0;font-size:17px;font-weight:600;color:#111827;">Nueva Comisión</h3>
+      <button onclick="closeModal('modal-comision')" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9ca3af;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <input type="hidden" id="com-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Cliente *</label><select id="com-cliente" class="form-select"></select></div>
+        <div class="form-group"><label class="form-label">Proveedor</label><select id="com-proveedor" class="form-select"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Monto Comisión ($) *</label><input type="number" id="com-monto" class="form-input" value="0" min="0" step="0.01"></div>
+        <div class="form-group"><label class="form-label">¿Ya se cobró?</label>
+          <select id="com-pagada" class="form-select">
+            <option value="No">No</option>
+            <option value="Si">Sí</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Fecha Inicio Viaje</label><input type="date" id="com-inicio" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Fecha Fin Viaje</label><input type="date" id="com-fin" class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Notas</label><textarea id="com-notas" class="form-input" rows="2" placeholder="Observaciones..."></textarea></div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:12px;justify-content:flex-end;">
+      <button onclick="closeModal('modal-comision')" class="btn-secondary">Cancelar</button>
+      <button onclick="saveComision()" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div id="modal-delete" class="modal-overlay" style="display:none;">
+  <div class="modal" style="max-width:400px;">
+    <div style="padding:32px 24px;text-align:center;">
+      <div style="width:56px;height:56px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </div>
+      <h3 id="delete-title" style="font-size:17px;font-weight:600;color:#111827;margin:0 0 8px;">¿Eliminar registro?</h3>
+      <p style="font-size:13px;color:#6b7280;margin:0 0 24px;">Esta acción no se puede deshacer.</p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="closeModal('modal-delete')" class="btn-secondary">Cancelar</button>
+        <button id="btn-confirm-delete" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:3000';
+  let cachedClientes = [], cachedProveedores = [], cachedCotizaciones = [], cachedReservas = [], cachedComisiones = [];
+
+  // =============================================
+  // INIT
+  // =============================================
+  async function init() {
+    // Cargar configuracion para login screen
+    try {
+      const cfg = await fetch(`${API}/configuracion`).then(r => r.json());
+      applyConfig(cfg);
+    } catch(e) {}
+    const user = sessionStorage.getItem('travel-crm-user');
+    if (user) showApp();
+  }
+
+  function applyConfig(cfg) {
+    if (!cfg) return;
+    const nombre = cfg.nombre || 'Travel CRM';
+    document.getElementById('page-title').textContent = nombre;
+    document.getElementById('login-nombre-agencia').textContent = nombre;
+    document.getElementById('sidebar-nombre').textContent = nombre;
+    if (cfg.logo_base64) {
+      const imgTag = `<img src="${cfg.logo_base64}" alt="logo" style="width:100%;height:100%;object-fit:cover;">`;
+      document.getElementById('sidebar-logo-wrap').innerHTML = imgTag;
+      document.getElementById('login-logo').innerHTML = imgTag;
+      document.getElementById('cfg-logo-preview').innerHTML = imgTag;
+    }
+    document.getElementById('cfg-nombre').value = nombre;
+  }
+
+  // =============================================
+  // LOGIN
+  // =============================================
+  async function handleLogin() {
+    const correo = document.getElementById('login-user').value.trim();
+    const contrasena = document.getElementById('login-password').value.trim();
+    if (!correo || !contrasena) { showToast('Ingresa tus credenciales', 'error'); return; }
+    try {
+      const data = await fetch(`${API}/login`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ correo, contrasena })
+      }).then(r=>r.json());
+      if (data.success) {
+        sessionStorage.setItem('travel-crm-user', correo);
+        document.getElementById('login-error').style.display = 'none';
+        showApp();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    } catch(e) { showToast('No se puede conectar al servidor', 'error'); }
+  }
+
+  function showApp() {
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-app').style.display = 'block';
+    showPage('dashboard');
+    loadAll();
+  }
+
+  function logout() {
+    if (confirm('¿Cerrar sesión?')) {
+      sessionStorage.removeItem('travel-crm-user');
+      document.getElementById('screen-login').style.display = 'block';
+      document.getElementById('screen-app').style.display = 'none';
+    }
+  }
+
+  // =============================================
+  // CARGA GLOBAL
+  // =============================================
+  async function loadAll() {
+    await Promise.all([loadClientes(), loadProveedores(), loadCotizaciones(), loadReservas(), loadComisiones()]);
+    updateStats();
+  }
+
+  // =============================================
+  // CONFIGURACIÓN
+  // =============================================
+  function previewLogo(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('cfg-logo-preview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function saveConfiguracion() {
+    const nombre = document.getElementById('cfg-nombre').value.trim() || 'Travel CRM';
+    const fileInput = document.getElementById('cfg-logo-file');
+    const file = fileInput.files[0];
+
+    let logo_base64 = null;
+    if (file) {
+      logo_base64 = await new Promise(res => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result);
+        r.readAsDataURL(file);
+      });
+    }
+
+    try {
+      await fetch(`${API}/configuracion`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, logo_base64 })
+      });
+      const cfg = await fetch(`${API}/configuracion`).then(r => r.json());
+      applyConfig(cfg);
+      showToast('Configuración guardada', 'success');
+    } catch(e) { showToast('Error al guardar configuración', 'error'); }
+  }
+
+  // =============================================
+  // CLIENTES
+  // =============================================
+  async function loadClientes() {
+    try {
+      cachedClientes = await fetch(`${API}/clientes`).then(r=>r.json());
+      renderClientes();
+    } catch(e) { showToast('Error cargando clientes','error'); }
+  }
+
+  function openModalCliente(c) {
+    document.getElementById('modal-cliente-title').textContent = c ? 'Editar Cliente' : 'Agregar Cliente';
+    document.getElementById('cli-id').value = c ? c.id_cliente : '';
+    document.getElementById('cli-nombre').value = c ? c.nombre : '';
+    document.getElementById('cli-email').value = c ? (c.email||'') : '';
+    document.getElementById('cli-telefono').value = c ? (c.telefono||'') : '';
+    document.getElementById('cli-como').value = c ? (c.como_supieron||'') : '';
+    document.getElementById('modal-cliente').style.display = 'flex';
+  }
+
+  async function saveCliente() {
+    const nombre = document.getElementById('cli-nombre').value.trim();
+    if (!nombre) { showToast('Nombre requerido','error'); return; }
+    const id = document.getElementById('cli-id').value;
+    const payload = {
+      nombre,
+      email: document.getElementById('cli-email').value.trim(),
+      telefono: document.getElementById('cli-telefono').value.trim(),
+      como_supieron: document.getElementById('cli-como').value || null
+    };
+    try {
+      await fetch(`${API}/clientes${id?'/'+id:''}`, {
+        method: id ? 'PUT' : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      closeModal('modal-cliente');
+      showToast(id ? 'Cliente actualizado' : 'Cliente guardado', 'success');
+      await loadClientes(); updateStats();
+    } catch(e) { showToast('Error al guardar','error'); }
+  }
+
+  function renderClientes() {
+    const t = document.getElementById('clientes-body');
+    if (!cachedClientes.length) { t.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:#9ca3af;">No hay clientes</td></tr>'; return; }
+    t.innerHTML = cachedClientes.map(c => `<tr>
+      <td style="font-weight:500;">${c.nombre}</td>
+      <td style="color:#6b7280;">${c.email||'—'}</td>
+      <td style="color:#6b7280;">${c.telefono||'—'}</td>
+      <td>${c.como_supieron ? `<span class="badge badge-blue">${c.como_supieron}</span>` : '<span style="color:#9ca3af;font-size:13px;">—</span>'}</td>
+      <td><div class="actions-cell">
+        <button class="btn-edit" onclick='openModalCliente(${JSON.stringify(c)})'>Editar</button>
+        <button class="btn-danger" onclick="confirmDelete('clientes',${c.id_cliente},'cliente')">Eliminar</button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  // =============================================
+  // PROVEEDORES
+  // =============================================
+  async function loadProveedores() {
+    try {
+      cachedProveedores = await fetch(`${API}/proveedores`).then(r=>r.json());
+      renderProveedores();
+    } catch(e) { showToast('Error cargando proveedores','error'); }
+  }
+
+  function openModalProveedor(p) {
+    document.getElementById('modal-proveedor-title').textContent = p ? 'Editar Proveedor' : 'Agregar Proveedor';
+    document.getElementById('prov-id').value = p ? p.id_proveedor : '';
+    document.getElementById('prov-nombre').value = p ? p.nombre : '';
+    document.getElementById('prov-tipo').value = p ? p.tipo : 'Directo';
+    document.getElementById('prov-comision').value = p ? p.comision : 0;
+    document.getElementById('modal-proveedor').style.display = 'flex';
+  }
+
+  async function saveProveedor() {
+    const nombre = document.getElementById('prov-nombre').value.trim();
+    if (!nombre) { showToast('Nombre requerido','error'); return; }
+    const id = document.getElementById('prov-id').value;
+    const payload = { nombre, tipo: document.getElementById('prov-tipo').value, comision: document.getElementById('prov-comision').value };
+    try {
+      await fetch(`${API}/proveedores${id?'/'+id:''}`, {
+        method: id ? 'PUT' : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      closeModal('modal-proveedor');
+      showToast(id ? 'Proveedor actualizado' : 'Proveedor guardado', 'success');
+      await loadProveedores();
+    } catch(e) { showToast('Error al guardar','error'); }
+  }
+
+  function renderProveedores() {
+    const t = document.getElementById('proveedores-body');
+    if (!cachedProveedores.length) { t.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:#9ca3af;">No hay proveedores</td></tr>'; return; }
+    t.innerHTML = cachedProveedores.map(p => `<tr>
+      <td style="font-weight:500;">${p.nombre}</td>
+      <td><span class="badge badge-blue">${p.tipo}</span></td>
+      <td>${p.comision}%</td>
+      <td><div class="actions-cell">
+        <button class="btn-edit" onclick='openModalProveedor(${JSON.stringify(p)})'>Editar</button>
+        <button class="btn-danger" onclick="confirmDelete('proveedores',${p.id_proveedor},'proveedor')">Eliminar</button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  // =============================================
+  // COTIZACIONES
+  // =============================================
+  async function loadCotizaciones() {
+    try {
+      cachedCotizaciones = await fetch(`${API}/cotizaciones`).then(r=>r.json());
+      renderCotizaciones();
+    } catch(e) { showToast('Error cargando cotizaciones','error'); }
+  }
+
+  function openModalCotizacion(q) {
+    document.getElementById('modal-cotizacion-title').textContent = q ? 'Editar Cotización' : 'Nueva Cotización';
+    document.getElementById('cot-id').value = q ? q.id_cotizacion : '';
+    const cSel = document.getElementById('cot-cliente');
+    const pSel = document.getElementById('cot-proveedor');
+    cSel.innerHTML = '<option value="">Seleccione</option>' + cachedClientes.map(c=>`<option value="${c.id_cliente}">${c.nombre}</option>`).join('');
+    pSel.innerHTML = '<option value="">Seleccione</option>' + cachedProveedores.map(p=>`<option value="${p.id_proveedor}">${p.nombre}</option>`).join('');
+    if (q) {
+      cSel.value = q.id_cliente||'';
+      pSel.value = q.id_proveedor||'';
+      document.getElementById('cot-destino').value = q.destino||'';
+      document.getElementById('cot-precio').value = q.precio||0;
+      document.getElementById('cot-estatus').value = q.estatus||'Pendiente';
+      document.getElementById('cot-fecha').value = q.fecha ? q.fecha.split('T')[0] : '';
+      document.getElementById('cot-fecha-viaje').value = q.fecha_viaje ? q.fecha_viaje.split('T')[0] : '';
+    } else {
+      document.getElementById('cot-destino').value = '';
+      document.getElementById('cot-precio').value = 0;
+      document.getElementById('cot-estatus').value = 'Pendiente';
+      document.getElementById('cot-fecha').value = new Date().toISOString().split('T')[0];
+      document.getElementById('cot-fecha-viaje').value = '';
+    }
+    document.getElementById('modal-cotizacion').style.display = 'flex';
+  }
+
+  async function saveCotizacion() {
+    const destino = document.getElementById('cot-destino').value.trim();
+    if (!destino) { showToast('Destino requerido','error'); return; }
+    const id = document.getElementById('cot-id').value;
+    const payload = {
+      id_cliente: document.getElementById('cot-cliente').value,
+      id_proveedor: document.getElementById('cot-proveedor').value,
+      destino,
+      precio: parseFloat(document.getElementById('cot-precio').value)||0,
+      fecha: document.getElementById('cot-fecha').value,
+      fecha_viaje: document.getElementById('cot-fecha-viaje').value||null,
+      estatus: document.getElementById('cot-estatus').value
+    };
+    try {
+      await fetch(`${API}/cotizaciones${id?'/'+id:''}`, {
+        method: id ? 'PUT' : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      closeModal('modal-cotizacion');
+      showToast(id ? 'Cotización actualizada' : 'Cotización creada', 'success');
+      await loadCotizaciones(); updateStats();
+    } catch(e) { showToast('Error al guardar','error'); }
+  }
+
+  function renderCotizaciones() {
+    const t = document.getElementById('cotizaciones-body');
+    if (!cachedCotizaciones.length) { t.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af;">No hay cotizaciones</td></tr>'; return; }
+    t.innerHTML = cachedCotizaciones.map(q => `<tr>
+      <td style="font-weight:500;">${q.nombre_cliente||q.id_cliente}</td>
+      <td>${q.destino}</td>
+      <td>$${parseFloat(q.precio).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td style="color:#6b7280;">${fmtDate(q.fecha)}</td>
+      <td style="color:#6b7280;">${q.fecha_viaje ? fmtDate(q.fecha_viaje) : '—'}</td>
+      <td><span class="badge ${q.estatus==='Aceptada'?'badge-green':q.estatus==='Rechazada'?'badge-red':'badge-yellow'}">${q.estatus}</span></td>
+      <td><div class="actions-cell">
+        <button class="btn-edit" onclick='openModalCotizacion(${JSON.stringify(q)})'>Editar</button>
+        <button class="btn-danger" onclick="confirmDelete('cotizaciones',${q.id_cotizacion},'cotización')">Eliminar</button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  // =============================================
+  // RESERVAS
+  // =============================================
+  async function loadReservas() {
+    try {
+      cachedReservas = await fetch(`${API}/reservas`).then(r=>r.json());
+      renderReservas();
+    } catch(e) { showToast('Error cargando reservas','error'); }
+  }
+
+  function openModalReserva(r) {
+    document.getElementById('modal-reserva-title').textContent = r ? 'Editar Reserva' : 'Nueva Reserva';
+    document.getElementById('res-id').value = r ? r.id_reserva : '';
+    const cSel = document.getElementById('res-cliente');
+    const pSel = document.getElementById('res-proveedor');
+    cSel.innerHTML = '<option value="">Seleccione</option>' + cachedClientes.map(c=>`<option value="${c.id_cliente}">${c.nombre}</option>`).join('');
+    pSel.innerHTML = '<option value="">— Sin especificar —</option>' + cachedProveedores.map(p=>`<option value="${p.id_proveedor}">${p.nombre}</option>`).join('');
+    if (r) {
+      cSel.value = r.id_cliente||'';
+      pSel.value = r.id_proveedor||'';
+      document.getElementById('res-tipo').value = r.tipo||'Paquete de viaje';
+      document.getElementById('res-pago').value = r.tipo_pago||'Una sola exhibición';
+      document.getElementById('res-monto').value = r.monto_total||0;
+      document.getElementById('res-caja').value = r.tipo_caja||'';
+      document.getElementById('res-fecha').value = r.fecha ? r.fecha.split('T')[0] : '';
+      document.getElementById('res-comision').value = r.comision||'No';
+    } else {
+      cSel.value=''; pSel.value='';
+      document.getElementById('res-tipo').value='Paquete de viaje';
+      document.getElementById('res-pago').value='Una sola exhibición';
+      document.getElementById('res-monto').value=0;
+      document.getElementById('res-caja').value='';
+      document.getElementById('res-fecha').value = new Date().toISOString().split('T')[0];
+      document.getElementById('res-comision').value='Si';
+    }
+    document.getElementById('modal-reserva').style.display = 'flex';
+  }
+
+  async function saveReserva() {
+    const id_cliente = document.getElementById('res-cliente').value;
+    if (!id_cliente) { showToast('Selecciona un cliente','error'); return; }
+    const id = document.getElementById('res-id').value;
+    const payload = {
+      id_cliente,
+      id_proveedor: document.getElementById('res-proveedor').value||null,
+      tipo: document.getElementById('res-tipo').value,
+      monto_total: parseFloat(document.getElementById('res-monto').value)||0,
+      tipo_pago: document.getElementById('res-pago').value,
+      tipo_caja: document.getElementById('res-caja').value||null,
+      fecha: document.getElementById('res-fecha').value,
+      comision: document.getElementById('res-comision').value
+    };
+    try {
+      await fetch(`${API}/reservas${id?'/'+id:''}`, {
+        method: id ? 'PUT' : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      closeModal('modal-reserva');
+      showToast(id ? 'Reserva actualizada' : 'Reserva guardada', 'success');
+      await loadReservas(); updateStats();
+    } catch(e) { showToast('Error al guardar','error'); }
+  }
+
+  function renderReservas() {
+    const t = document.getElementById('reservas-body');
+    if (!cachedReservas.length) { t.innerHTML='<tr><td colspan="9" style="text-align:center;padding:32px;color:#9ca3af;">No hay reservas</td></tr>'; return; }
+    t.innerHTML = cachedReservas.map(r => `<tr>
+      <td style="font-weight:500;">${r.nombre_cliente||r.id_cliente}</td>
+      <td>${r.tipo}</td>
+      <td style="color:#6b7280;">${r.nombre_proveedor||'—'}</td>
+      <td>$${parseFloat(r.monto_total).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td style="color:#6b7280;">${r.tipo_pago}</td>
+      <td style="color:#6b7280;">${r.tipo_caja||'—'}</td>
+      <td style="color:#6b7280;">${fmtDate(r.fecha)}</td>
+      <td>${r.comision==='Si'?'<span class="badge badge-green">Sí</span>':'<span style="color:#9ca3af;font-size:13px;">No</span>'}</td>
+      <td><div class="actions-cell">
+        <button class="btn-edit" onclick='openModalReserva(${JSON.stringify(r)})'>Editar</button>
+        <button class="btn-danger" onclick="confirmDelete('reservas',${r.id_reserva},'reserva')">Eliminar</button>
+      </div></td>
+    </tr>`).join('');
+
+    // Dashboard
+    const dash = document.getElementById('dashboard-reservas-body');
+    const rec = [...cachedReservas].slice(0,5);
+    dash.innerHTML = rec.length ? rec.map(r=>`<tr>
+      <td style="color:#6b7280;font-size:13px;">#${r.id_reserva}</td>
+      <td style="font-weight:500;">${r.nombre_cliente||r.id_cliente}</td>
+      <td>$${parseFloat(r.monto_total).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td style="color:#6b7280;">${fmtDate(r.fecha)}</td>
+    </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;padding:32px;color:#9ca3af;">No hay reservas</td></tr>';
+  }
+
+  // =============================================
+  // COMISIONES
+  // =============================================
+  async function loadComisiones() {
+    try {
+      cachedComisiones = await fetch(`${API}/comisiones`).then(r=>r.json());
+      renderComisiones();
+    } catch(e) { showToast('Error cargando comisiones','error'); }
+  }
+
+  function openModalComision(c) {
+    document.getElementById('modal-comision-title').textContent = c ? 'Editar Comisión' : 'Nueva Comisión';
+    document.getElementById('com-id').value = c ? c.id_comision : '';
+    const cSel = document.getElementById('com-cliente');
+    const pSel = document.getElementById('com-proveedor');
+    cSel.innerHTML = '<option value="">Seleccione</option>' + cachedClientes.map(cl=>`<option value="${cl.id_cliente}">${cl.nombre}</option>`).join('');
+    pSel.innerHTML = '<option value="">— Sin especificar —</option>' + cachedProveedores.map(p=>`<option value="${p.id_proveedor}">${p.nombre}</option>`).join('');
+    if (c) {
+      cSel.value=c.id_cliente||'';
+      pSel.value=c.id_proveedor||'';
+      document.getElementById('com-monto').value=c.monto_comision||0;
+      document.getElementById('com-pagada').value=c.pagada||'No';
+      document.getElementById('com-inicio').value=c.fecha_inicio?c.fecha_inicio.split('T')[0]:'';
+      document.getElementById('com-fin').value=c.fecha_fin?c.fecha_fin.split('T')[0]:'';
+      document.getElementById('com-notas').value=c.notas||'';
+    } else {
+      cSel.value=''; pSel.value='';
+      document.getElementById('com-monto').value=0;
+      document.getElementById('com-pagada').value='No';
+      document.getElementById('com-inicio').value='';
+      document.getElementById('com-fin').value='';
+      document.getElementById('com-notas').value='';
+    }
+    document.getElementById('modal-comision').style.display='flex';
+  }
+
+  async function saveComision() {
+    const id_cliente = document.getElementById('com-cliente').value;
+    if (!id_cliente) { showToast('Selecciona un cliente','error'); return; }
+    const id = document.getElementById('com-id').value;
+    const payload = {
+      id_cliente,
+      id_proveedor: document.getElementById('com-proveedor').value||null,
+      monto_comision: parseFloat(document.getElementById('com-monto').value)||0,
+      pagada: document.getElementById('com-pagada').value,
+      fecha_inicio: document.getElementById('com-inicio').value||null,
+      fecha_fin: document.getElementById('com-fin').value||null,
+      notas: document.getElementById('com-notas').value||null
+    };
+    try {
+      await fetch(`${API}/comisiones${id?'/'+id:''}`, {
+        method: id?'PUT':'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      closeModal('modal-comision');
+      showToast(id?'Comisión actualizada':'Comisión registrada','success');
+      await loadComisiones();
+    } catch(e) { showToast('Error al guardar','error'); }
+  }
+
+  function renderComisiones() {
+    const t = document.getElementById('comisiones-body');
+    if (!cachedComisiones.length) { t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:#9ca3af;">No hay comisiones</td></tr>'; return; }
+    t.innerHTML = cachedComisiones.map(c=>`<tr>
+      <td style="font-weight:500;">${c.nombre_cliente||c.id_cliente}</td>
+      <td style="color:#6b7280;">${c.nombre_proveedor||'—'}</td>
+      <td>$${parseFloat(c.monto_comision).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td style="color:#6b7280;">${c.fecha_inicio?fmtDate(c.fecha_inicio):'—'}</td>
+      <td style="color:#6b7280;">${c.fecha_fin?fmtDate(c.fecha_fin):'—'}</td>
+      <td>${c.pagada==='Si'?'<span class="badge badge-green">Sí</span>':'<span class="badge badge-red">No</span>'}</td>
+      <td style="color:#6b7280;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.notas||''}">${c.notas||'—'}</td>
+      <td><div class="actions-cell">
+        <button class="btn-edit" onclick='openModalComision(${JSON.stringify(c)})'>Editar</button>
+        <button class="btn-danger" onclick="confirmDelete('comisiones',${c.id_comision},'comisión')">Eliminar</button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  // =============================================
+  // REPORTES
+  // =============================================
+  let repActivo = 'cotizaciones';
+
+  function switchReporte(tab) {
+    ['cotizaciones','reservas','comisiones','general'].forEach(t => {
+      document.getElementById('rep-panel-'+t).style.display = t===tab ? 'block' : 'none';
+      const btn = document.getElementById('rep-tab-'+t);
+      btn.style.color = t===tab ? '#2563eb' : '#6b7280';
+      btn.style.borderBottom = t===tab ? '3px solid #2563eb' : '3px solid transparent';
+      btn.style.fontWeight = t===tab ? '600' : '500';
+    });
+    repActivo = tab;
+    if (tab === 'general') updateReportes();
+    if (tab === 'cotizaciones') {
+      // Llenar selector de proveedores en filtro
+      const sel = document.getElementById('rep-cot-prov');
+      sel.innerHTML = '<option value="">Todos</option>' + cachedProveedores.map(p=>`<option value="${p.id_proveedor}">${p.nombre}</option>`).join('');
+    }
+  }
+
+  async function cargarReporteCotizaciones() {
+    const fi = document.getElementById('rep-cot-fi').value;
+    const ff = document.getElementById('rep-cot-ff').value;
+    const prov = document.getElementById('rep-cot-prov').value;
+    const params = new URLSearchParams();
+    if (fi) params.append('fecha_inicio', fi);
+    if (ff) params.append('fecha_fin', ff);
+    if (prov) params.append('id_proveedor', prov);
+    const data = await fetch(`${API}/reportes/cotizaciones?${params}`).then(r=>r.json());
+    const t = document.getElementById('rep-cot-tabla');
+    if (!data.length) { t.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af;">Sin resultados</td></tr>'; return; }
+    t.innerHTML = data.map(q=>`<tr>
+      <td>${q.nombre_cliente||q.id_cliente}</td>
+      <td>${q.nombre_proveedor||'—'}</td>
+      <td>${q.destino}</td>
+      <td>$${parseFloat(q.precio).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td>${fmtDate(q.fecha)}</td>
+      <td>${q.fecha_viaje?fmtDate(q.fecha_viaje):'—'}</td>
+      <td><span class="badge ${q.estatus==='Aceptada'?'badge-green':q.estatus==='Rechazada'?'badge-red':'badge-yellow'}">${q.estatus}</span></td>
+    </tr>`).join('');
+  }
+
+  async function cargarReporteReservas() {
+    const fi = document.getElementById('rep-res-fi').value;
+    const ff = document.getElementById('rep-res-ff').value;
+    const params = new URLSearchParams();
+    if (fi) params.append('fecha_inicio', fi);
+    if (ff) params.append('fecha_fin', ff);
+    const data = await fetch(`${API}/reportes/reservas?${params}`).then(r=>r.json());
+    const t = document.getElementById('rep-res-tabla');
+    if (!data.length) { t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:#9ca3af;">Sin resultados</td></tr>'; return; }
+    t.innerHTML = data.map(r=>`<tr>
+      <td>${r.nombre_cliente||r.id_cliente}</td>
+      <td>${r.nombre_proveedor||'—'}</td>
+      <td>${r.tipo}</td>
+      <td>$${parseFloat(r.monto_total).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td>${r.tipo_pago}</td>
+      <td>${r.tipo_caja||'—'}</td>
+      <td>${fmtDate(r.fecha)}</td>
+      <td>${r.comision==='Si'?'<span class="badge badge-green">Sí</span>':'<span class="badge badge-red">No</span>'}</td>
+    </tr>`).join('');
+  }
+
+  async function cargarReporteComisiones() {
+    const pagada = document.getElementById('rep-com-pagada').value;
+    const params = new URLSearchParams();
+    if (pagada) params.append('pagada', pagada);
+    const data = await fetch(`${API}/reportes/comisiones?${params}`).then(r=>r.json());
+    const t = document.getElementById('rep-com-tabla');
+    if (!data.length) { t.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af;">Sin resultados</td></tr>'; return; }
+    t.innerHTML = data.map(c=>`<tr>
+      <td>${c.nombre_cliente||c.id_cliente}</td>
+      <td>${c.nombre_proveedor||'—'}</td>
+      <td>$${parseFloat(c.monto_comision).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td>${c.fecha_inicio?fmtDate(c.fecha_inicio):'—'}</td>
+      <td>${c.fecha_fin?fmtDate(c.fecha_fin):'—'}</td>
+      <td>${c.pagada==='Si'?'<span class="badge badge-green">Sí</span>':'<span class="badge badge-red">No</span>'}</td>
+      <td>${c.notas||'—'}</td>
+    </tr>`).join('');
+  }
+
+  // =============================================
+  // EXPORT EXCEL / PDF
+  // =============================================
+  function exportarExcel(tbodyId, nombre) {
+    const tbody = document.getElementById(tbodyId);
+    const table = tbody.closest('table');
+    const ws = XLSX.utils.table_to_sheet(table);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, nombre);
+    XLSX.writeFile(wb, `${nombre}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showToast('Descargando Excel...', 'success');
+  }
+
+  function exportarPDF(tbodyId, titulo) {
+    const tbody = document.getElementById(tbodyId);
+    const table = tbody.closest('table');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    let html = `<html><head><meta charset="UTF-8"><title>${titulo}</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;}h2{color:#1e3a5f;}table{width:100%;border-collapse:collapse;}
+    th{background:#2563eb;color:#fff;padding:8px 10px;font-size:12px;text-align:left;}
+    td{padding:7px 10px;font-size:12px;border-bottom:1px solid #e5e7eb;}
+    tr:nth-child(even) td{background:#f9fafb;}</style></head><body>
+    <h2>${titulo}</h2><p style="font-size:12px;color:#6b7280;">Generado el ${new Date().toLocaleDateString('es-MX')}</p><table>`;
+    rows.forEach(r => {
+      html += '<tr>';
+      r.querySelectorAll('th,td').forEach(cell => {
+        const tag = cell.tagName.toLowerCase();
+        html += `<${tag}>${cell.innerText}</${tag}>`;
+      });
+      html += '</tr>';
+    });
+    html += '</table></body></html>';
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    win.print();
+  }
+
+  // =============================================
+  // ESTADÍSTICAS
+  // =============================================
+  function updateStats() {
+    document.getElementById('stat-clientes').textContent = cachedClientes.length;
+    document.getElementById('stat-cotizaciones').textContent = cachedCotizaciones.length;
+    document.getElementById('stat-reservas').textContent = cachedReservas.length;
+    const total = cachedReservas.reduce((s,r)=>s+(parseFloat(r.monto_total)||0),0);
+    document.getElementById('stat-ingresos').textContent = '$'+total.toLocaleString('es-MX',{minimumFractionDigits:2});
+  }
+
+  function updateReportes() {
+    document.getElementById('rep-clientes').textContent = cachedClientes.length;
+    document.getElementById('rep-cotizaciones').textContent = cachedCotizaciones.length;
+    document.getElementById('rep-reservas').textContent = cachedReservas.length;
+    const total = cachedReservas.reduce((s,r)=>s+(parseFloat(r.monto_total)||0),0);
+    document.getElementById('rep-ingresos').textContent = '$'+total.toLocaleString('es-MX',{minimumFractionDigits:2});
+    document.getElementById('rep-aceptadas').textContent = cachedCotizaciones.filter(q=>q.estatus==='Aceptada').length;
+    document.getElementById('rep-pendientes').textContent = cachedCotizaciones.filter(q=>q.estatus==='Pendiente').length;
+    document.getElementById('rep-rechazadas').textContent = cachedCotizaciones.filter(q=>q.estatus==='Rechazada').length;
+  }
+
+  // =============================================
+  // ELIMINAR
+  // =============================================
+  function confirmDelete(recurso, id, label) {
+    document.getElementById('delete-title').textContent = '¿Eliminar ' + label + '?';
+    document.getElementById('btn-confirm-delete').onclick = async () => {
+      try {
+        await fetch(`${API}/${recurso}/${id}`, { method:'DELETE' });
+        closeModal('modal-delete');
+        showToast('Eliminado','success');
+        await loadAll();
+      } catch(e) { showToast('Error al eliminar','error'); }
+    };
+    document.getElementById('modal-delete').style.display = 'flex';
+  }
+
+  // =============================================
+  // NAVEGACIÓN Y MODALES
+  // =============================================
+  function showPage(page) {
+    ['dashboard','clientes','proveedores','cotizaciones','reservas','comisiones','reportes','configuracion'].forEach(p => {
+      document.getElementById('page-'+p).style.display = 'none';
+      document.getElementById('nav-'+p).classList.remove('active');
+    });
+    document.getElementById('page-'+page).style.display = 'block';
+    document.getElementById('nav-'+page).classList.add('active');
+    if (page==='reportes') { switchReporte('cotizaciones'); updateReportes(); }
+    if (page==='configuracion') {
+      fetch(`${API}/configuracion`).then(r=>r.json()).then(applyConfig).catch(()=>{});
+    }
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  // =============================================
+  // UTILIDADES
+  // =============================================
+  function fmtDate(d) {
+    if (!d) return '—';
+    try { return new Date(d).toLocaleDateString('es-MX'); } catch { return d; }
+  }
+
+  function showToast(msg, type='success') {
+    const t = document.createElement('div');
+    t.className = 'toast '+type;
+    t.textContent = msg;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(()=>t.remove(), 3000);
+  }
+
+  init();
+</script>
+</body>
 </html>
