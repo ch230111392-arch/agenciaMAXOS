@@ -31,7 +31,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 *
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'jcruzpd12',
+  password: 'dari12',
   database: 'agencia_viajes'
 });
 
