@@ -4,8 +4,240 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="page-title">Travel CRM</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17">
+function renderChartCotizaciones(datos) {
+
+  const aceptadas = datos.filter(x => x.estatus === 'Aceptada').length;
+  const pendientes = datos.filter(x => x.estatus === 'Pendiente').length;
+  const rechazadas = datos.filter(x => x.estatus === 'Rechazada').length;
+
+  const ctx = document.getElementById('chartCotizaciones');
+  if (!ctx) return;
+
+  if (chartCotizaciones) chartCotizaciones.destroy();
+
+  chartCotizaciones = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Aceptadas', 'Pendientes', 'Rechazadas'],
+      datasets: [{
+        label: 'Cotizaciones',
+        data: [aceptadas, pendientes, rechazadas],
+        backgroundColor: ['#16a34a','#eab308','#dc2626'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderChartReservas(datos) {
+
+  const ctx = document.getElementById('chartReservas');
+  if (!ctx) return;
+
+  if (chartReservas) chartReservas.destroy();
+
+  chartReservas = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: datos.map(r => r.nombre_cliente || 'Cliente'),
+      datasets: [{
+        label: 'Ingresos',
+        data: datos.map(r => Number(r.monto || 0)),
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.2)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+function renderChartComisiones(datos) {
+
+  const cobradas = datos.filter(x => x.pagada === 'Si').length;
+  const pendientes = datos.filter(x => x.pagada === 'No').length;
+
+  const ctx = document.getElementById('chartComisiones');
+  if (!ctx) return;
+
+  if (chartComisiones) chartComisiones.destroy();
+
+  chartComisiones = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Cobradas', 'Pendientes'],
+      datasets: [{
+        data: [cobradas, pendientes],
+        backgroundColor: ['#16a34a','#dc2626']
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+function renderChartCotizaciones(datos) {
+
+  const aceptadas = datos.filter(x => x.estatus === 'Aceptada').length;
+  const pendientes = datos.filter(x => x.estatus === 'Pendiente').length;
+  const rechazadas = datos.filter(x => x.estatus === 'Rechazada').length;
+
+  const ctx = document.getElementById('chartCotizaciones');
+  if (!ctx) return;
+
+  if (chartCotizaciones) chartCotizaciones.destroy();
+
+  chartCotizaciones = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Aceptadas', 'Pendientes', 'Rechazadas'],
+      datasets: [{
+        label: 'Cotizaciones',
+        data: [aceptadas, pendientes, rechazadas],
+        backgroundColor: ['#16a34a','#eab308','#dc2626'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderChartReservas(datos) {
+
+  const ctx = document.getElementById('chartReservas');
+  if (!ctx) return;
+
+  if (chartReservas) chartReservas.destroy();
+
+  chartReservas = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: datos.map(r => r.nombre_cliente || 'Cliente'),
+      datasets: [{
+        label: 'Ingresos',
+        data: datos.map(r => Number(r.monto || 0)),
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.2)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+function renderChartComisiones(datos) {
+
+  const cobradas = datos.filter(x => x.pagada === 'Si').length;
+  const pendientes = datos.filter(x => x.pagada === 'No').length;
+
+  const ctx = document.getElementById('chartComisiones');
+  if (!ctx) return;
+
+  if (chartComisiones) chartComisiones.destroy();
+
+  chartComisiones = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Cobradas', 'Pendientes'],
+      datasets: [{
+        data: [cobradas, pendientes],
+        backgroundColor: ['#16a34a','#dc2626']
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js">
+function renderChartCotizaciones(datos) {
+
+  const aceptadas = datos.filter(x => x.estatus === 'Aceptada').length;
+  const pendientes = datos.filter(x => x.estatus === 'Pendiente').length;
+  const rechazadas = datos.filter(x => x.estatus === 'Rechazada').length;
+
+  const ctx = document.getElementById('chartCotizaciones');
+  if (!ctx) return;
+
+  if (chartCotizaciones) chartCotizaciones.destroy();
+
+  chartCotizaciones = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Aceptadas', 'Pendientes', 'Rechazadas'],
+      datasets: [{
+        label: 'Cotizaciones',
+        data: [aceptadas, pendientes, rechazadas],
+        backgroundColor: ['#16a34a','#eab308','#dc2626'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderChartReservas(datos) {
+
+  const ctx = document.getElementById('chartReservas');
+  if (!ctx) return;
+
+  if (chartReservas) chartReservas.destroy();
+
+  chartReservas = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: datos.map(r => r.nombre_cliente || 'Cliente'),
+      datasets: [{
+        label: 'Ingresos',
+        data: datos.map(r => Number(r.monto || 0)),
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.2)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+function renderChartComisiones(datos) {
+
+  const cobradas = datos.filter(x => x.pagada === 'Si').length;
+  const pendientes = datos.filter(x => x.pagada === 'No').length;
+
+  const ctx = document.getElementById('chartComisiones');
+  if (!ctx) return;
+
+  if (chartComisiones) chartComisiones.destroy();
+
+  chartComisiones = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Cobradas', 'Pendientes'],
+      datasets: [{
+        data: [cobradas, pendientes],
+        backgroundColor: ['#16a34a','#dc2626']
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
@@ -140,6 +372,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0"/></svg>
           Configuración
         </div>
+      
+        <div onclick="showPage('manual')" id="nav-manual" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          Manual de Usuario
+        </div>
+
       </nav>
       <div style="position:absolute;bottom:20px;left:0;right:0;padding:0 12px;">
         <div onclick="logout()" class="nav-item" style="color:#ef4444;">
@@ -291,6 +532,7 @@
         <div id="rep-panel-cotizaciones">
           <div class="filter-bar">
             <div class="form-group"><label class="form-label">Fecha inicio</label><input type="date" id="rep-cot-fi" class="form-input" style="width:160px;"></div>
+<div class="stat-card" style="margin-bottom:20px;"><canvas id="chartCotizaciones" height="100"></canvas></div>
             <div class="form-group"><label class="form-label">Fecha fin</label><input type="date" id="rep-cot-ff" class="form-input" style="width:160px;"></div>
             <div class="form-group"><label class="form-label">Proveedor</label>
               <select id="rep-cot-prov" class="form-select" style="width:180px;">
@@ -313,6 +555,7 @@
         <div id="rep-panel-reservas" style="display:none;">
           <div class="filter-bar">
             <div class="form-group"><label class="form-label">Fecha inicio</label><input type="date" id="rep-res-fi" class="form-input" style="width:160px;"></div>
+<div class="stat-card" style="margin-bottom:20px;"><canvas id="chartReservas" height="100"></canvas></div>
             <div class="form-group"><label class="form-label">Fecha fin</label><input type="date" id="rep-res-ff" class="form-input" style="width:160px;"></div>
             <button class="btn-primary" onclick="cargarReporteReservas()">Buscar</button>
             <button class="btn-green" onclick="exportarExcel('rep-res-tabla','Reservas')">⬇ Excel</button>
@@ -336,6 +579,7 @@
                 <option value="Si">Ya cobradas</option>
               </select>
             </div>
+<div class="stat-card" style="margin-bottom:20px;"><canvas id="chartComisiones" height="100"></canvas></div>
             <button class="btn-primary" onclick="cargarReporteComisiones()">Buscar</button>
             <button class="btn-green" onclick="exportarExcel('rep-com-tabla','Comisiones')">⬇ Excel</button>
             <button class="btn-secondary" onclick="exportarPDF('rep-com-tabla','Reporte de Comisiones')">⬇ PDF</button>
@@ -405,6 +649,56 @@
     </div>
   </div>
 </div>
+
+
+      <!-- MANUAL DE USUARIO -->
+      <div id="page-manual" style="display:none;">
+        <div class="page-header">
+          <h1 class="page-title">Manual de Usuario</h1>
+        </div>
+
+        <div style="background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:28px;line-height:1.8;">
+          <h2 style="font-size:22px;font-weight:700;color:#111827;margin-bottom:20px;">
+            ¿Cómo utilizar el sistema?
+          </h2>
+
+          <div style="margin-bottom:28px;">
+            <h3 style="font-size:18px;font-weight:600;color:#2563eb;">1. Inicio de sesión</h3>
+            <p>Ingresa tu correo y contraseña para acceder al sistema.</p>
+          </div>
+
+          <div style="margin-bottom:28px;">
+            <h3 style="font-size:18px;font-weight:600;color:#2563eb;">2. Registrar clientes</h3>
+            <p>Ve al módulo Clientes y presiona Agregar Cliente.</p>
+          </div>
+
+          <div style="margin-bottom:28px;">
+            <h3 style="font-size:18px;font-weight:600;color:#2563eb;">3. Registrar proveedores</h3>
+            <p>En proveedores puedes registrar hoteles, vuelos y agencias.</p>
+          </div>
+
+          <div style="margin-bottom:28px;">
+            <h3 style="font-size:18px;font-weight:600;color:#2563eb;">4. Crear cotizaciones</h3>
+            <p>Selecciona cliente, proveedor y destino.</p>
+          </div>
+
+          <div style="margin-bottom:28px;">
+            <h3 style="font-size:18px;font-weight:600;color:#2563eb;">5. Crear reservas</h3>
+            <p>Registra pagos, fechas y servicios.</p>
+          </div>
+
+          <div style="margin-bottom:28px;">
+            <h3 style="font-size:18px;font-weight:600;color:#2563eb;">6. Revisar reportes</h3>
+            <p>Consulta reportes y exporta Excel o PDF.</p>
+          </div>
+
+          <div>
+            <h3 style="font-size:18px;font-weight:600;color:#2563eb;">7. Configuración</h3>
+            <p>Personaliza nombre y logotipo de la agencia.</p>
+          </div>
+        </div>
+      </div>
+
 
 <!-- ===================== MODALES ===================== -->
 
@@ -628,6 +922,9 @@
 <script>
   const API = 'http://localhost:3000';
   let cachedClientes = [], cachedProveedores = [], cachedCotizaciones = [], cachedReservas = [], cachedComisiones = [];
+  let chartCotizaciones;
+  let chartReservas;
+  let chartComisiones;
 
   // =============================================
   // INIT
@@ -1293,6 +1590,83 @@
   }
 
   init();
+
+function renderChartCotizaciones(datos) {
+
+  const aceptadas = datos.filter(x => x.estatus === 'Aceptada').length;
+  const pendientes = datos.filter(x => x.estatus === 'Pendiente').length;
+  const rechazadas = datos.filter(x => x.estatus === 'Rechazada').length;
+
+  const ctx = document.getElementById('chartCotizaciones');
+  if (!ctx) return;
+
+  if (chartCotizaciones) chartCotizaciones.destroy();
+
+  chartCotizaciones = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Aceptadas', 'Pendientes', 'Rechazadas'],
+      datasets: [{
+        label: 'Cotizaciones',
+        data: [aceptadas, pendientes, rechazadas],
+        backgroundColor: ['#16a34a','#eab308','#dc2626'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderChartReservas(datos) {
+
+  const ctx = document.getElementById('chartReservas');
+  if (!ctx) return;
+
+  if (chartReservas) chartReservas.destroy();
+
+  chartReservas = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: datos.map(r => r.nombre_cliente || 'Cliente'),
+      datasets: [{
+        label: 'Ingresos',
+        data: datos.map(r => Number(r.monto || 0)),
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.2)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+function renderChartComisiones(datos) {
+
+  const cobradas = datos.filter(x => x.pagada === 'Si').length;
+  const pendientes = datos.filter(x => x.pagada === 'No').length;
+
+  const ctx = document.getElementById('chartComisiones');
+  if (!ctx) return;
+
+  if (chartComisiones) chartComisiones.destroy();
+
+  chartComisiones = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Cobradas', 'Pendientes'],
+      datasets: [{
+        data: [cobradas, pendientes],
+        backgroundColor: ['#16a34a','#dc2626']
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
 </script>
 </body>
 </html>
